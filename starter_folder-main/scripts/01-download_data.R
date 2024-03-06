@@ -12,7 +12,6 @@
 library(dataverse)
 library(tidyverse)
 library(dplyr)
-# [...UPDATE THIS...]
 
 #### Download data ####
 ces2020 <-
