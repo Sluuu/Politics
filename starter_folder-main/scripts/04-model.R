@@ -13,7 +13,7 @@ library(tidyverse)
 library(rstanarm)
 
 #### Read data ####
-analysis_data <- 
+analysis_data <- read_parquet("starter_folder-main/data/analysis_data/analysis_data.parquet")
 set.seed(853)
 
 ces2020_reduced <- 
@@ -38,7 +38,7 @@ saveRDS(
 ### Model data ####
 first_model <-
   stan_glm(
-    formula = voted_for ~ gender + weducation,
+    formula = voted_for ~ gender + education,
     data = analysis_data,
     family = binomial(link = "logit"),
     prior = normal(location = 0, scale = 2.5, autoscale = TRUE),
@@ -51,7 +51,7 @@ first_model <-
 #### Save model ####
 saveRDS(
   first_model,
-  file = "models/first_model.rds"
+  file = "starter_folder-main/models/first_model.rds"
 )
 
 
