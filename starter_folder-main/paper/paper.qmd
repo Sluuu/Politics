@@ -1,9 +1,9 @@
 ---
-title: "My title"
+title: "Spadina Paper"
 subtitle: "My subtitle if needed"
 author: 
   - Sean Liu
-thanks: "Code and data are available at: LINK."
+thanks: "Code and data are available at: https://github.com/Sluuu/Politics.git"
 date: today
 date-format: long
 abstract: "First sentence. Second sentence. Third sentence. Fourth sentence."
@@ -28,13 +28,12 @@ library(modelsummary)
 library(rstanarm)
 library(tidybayes)
 library(tidyverse)
-library(palmerpenguins)
 ```
 
 
 # Introduction
 
-You can and should cross-reference sections and sub-sections. We use @citeR and @rohan.
+we are interested in the US political support. In particular we are interested in whether we can forecast who a respondent is likely to vote for, based on knowing their employment status, highest level of education, and race. That means we are interested in a dataset with variables for who an individual voted for, and some of their characteristics, such as employment status, education level, and their race. We use @citeR and @rohan.
 
 The remainder of this paper is structured as follows. @sec-data....
 
@@ -49,35 +48,27 @@ Some of our data is of penguins (@fig-bills), from @palmerpenguins.
 #| fig-cap: Bills of penguins
 #| echo: false
 
-ggplot(penguins, aes(x = island, fill = species)) +
-  geom_bar(alpha = 0.8) +
-  scale_fill_manual(values = c("darkorange","purple","cyan4"),
-                    guide = "none") +
+ces2020 |>
+  ggplot(aes(x = education, fill = voted_for)) +
+  stat_count(position = "dodge") +
+  facet_wrap(facets = vars(employment_stat)) +
   theme_minimal() +
-  facet_wrap(~species, ncol = 1) +
-  coord_flip()
+  labs(
+    x = "Highest education",
+    y = "Number of respondents",
+    fill = "Voted for"
+  ) +
+  coord_flip() +
+  scale_fill_brewer(palette = "Set1") +
+  theme(legend.position = "bottom")
 ```
 
 Talk more about it.
 
 And also planes (@fig-planes). (You can change the height and width, but don't worry about doing that until you have finished every other aspect of the paper - Quarto will try to make it look nice and the defaults usually work well once you have enough text.)
 
-```{r}
-#| label: fig-planes
-#| fig-cap: Relationship between wing length and width
-#| echo: false
-#| warning: false
-#| message: false
 
-analysis_data <- read_csv(here::here("starter_folder-main/data/analysis_data/analysis_data.csv"))
 
-analysis_data |> 
-  ggplot(aes(x = width, y = length)) +
-  geom_point(alpha = 0.8) +
-  theme_minimal() +
-  labs(x = "Wing width (mm)",
-       y = "Wing length (mm)")
-```
 
 Talk way more about it. 
 
@@ -95,10 +86,11 @@ Define $y_i$ as the number of seconds that the plane remained aloft. Then $\beta
 
 \begin{align} 
 y_i|\pi_i &\sim \mbox{Bern}(\pi_i) \\
-\mbox{logit}(\pi_i) &= \alpha + \beta_1 \times \mbox{gender}_i + \beta_2 \times \mbox{education}_i\\
+\mbox{logit}(\pi_i) &= \alpha + \beta_1 \times \mbox{employment_status}_i + \beta_2 \times \mbox{education}_i + \beta_3 \times \mbox{race}_i\\
 \alpha &\sim \mbox{Normal}(0, 2.5) \\
 \beta_1 &\sim \mbox{Normal}(0, 5.02) \\
-\beta_2 &\sim \mbox{Normal}(0, 6.34)
+\beta_2 &\sim \mbox{Normal}(0, 6.34) \\
+\beta_3 &\sim \mbox{Normal}(0, 7.4)
 \end{align}
 
 We run the model in R [@citeR] using the `rstanarm` package of @rstanarm. We use the default priors from `rstanarm`.
@@ -136,10 +128,9 @@ first_model <-
 
 modelsummary::modelsummary(
   list(
-    "First model" = first_model
+    "Supported Biden" = first_model
   ),
-  statistic = "mad",
-  fmt = 2
+  statistic = "mad"
 )
 ```
 
