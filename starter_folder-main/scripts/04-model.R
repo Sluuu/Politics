@@ -22,7 +22,7 @@ ces2020_reduced <-
 
 political_preferences <-
   stan_glm(
-    voted_for ~ gender + education,
+    voted_for ~ employ + educ + race,
     data = ces2020_reduced,
     family = binomial(link = "logit"),
     prior = normal(location = 0, scale = 2.5, autoscale = TRUE),

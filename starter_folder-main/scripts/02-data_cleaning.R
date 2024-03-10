@@ -20,8 +20,9 @@ ces2020 <-
       cols(
         "votereg" = col_integer(),
         "CC20_410" = col_integer(),
-        "gender" = col_integer(),
-        "educ" = col_integer()
+        "employ" = col_integer(),
+        "educ" = col_integer(),
+        "race" = col_integer()
       )
   )
 
@@ -34,7 +35,16 @@ ces2020 <-
   mutate(
     voted_for = if_else(CC20_410 == 1, "Biden", "Trump"),
     voted_for = as_factor(voted_for),
-    gender = if_else(gender == 1, "Male", "Female"),
+    employment_stat = case_when(
+      employ == 1 ~ "Full-time",
+      employ == 2 ~ "Part-time",
+      employ == 3 ~ "Temporarily laid off",
+      employ == 4 ~ "Unemployed",
+      employ == 5 ~ "Retired",
+      employ == 6 ~ "Permanently disabled",
+      employ == 7 ~ "Homemaker",
+      employ == 8 ~ "Student"
+      ),
     education = case_when(
       educ == 1 ~ "No HS",
       educ == 2 ~ "High school graduate",
@@ -42,6 +52,15 @@ ces2020 <-
       educ == 4 ~ "2-year",
       educ == 5 ~ "4-year",
       educ == 6 ~ "Post-grad"
+    ),
+    race = case_when(
+      race == 1 ~ "White",
+      race == 2 ~ "Black",
+      race == 3 ~ "Hispanic",
+      race == 4 ~ "Asian",
+      race == 5 ~ "Native American",
+      race == 6 ~ "Middle Eastern",
+      race == 7 ~ "Two or more races"
     ),
     education = factor(
       education,
@@ -55,7 +74,7 @@ ces2020 <-
       )
     )
   ) |>
-  select(voted_for, gender, education)
+  select(voted_for, employment_stat, education, race)
 
 #### Save data ####
 write_parquet(ces2020, "starter_folder-main/data/analysis_data/analysis_data.parquet")
