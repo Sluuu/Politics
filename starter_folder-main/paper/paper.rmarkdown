@@ -31,6 +31,7 @@ library(tidyverse)
 ```
 
 
+
 # Introduction
 
 we are interested in the US political support. In particular we are interested in whether we can forecast who a respondent is likely to vote for, based on knowing their employment status, highest level of education, and race. That means we are interested in a dataset with variables for who an individual voted for, and some of their characteristics, such as employment status, education level, and their race. We use @citeR and @rohan.
@@ -42,6 +43,7 @@ The remainder of this paper is structured as follows. @sec-data....
 # Data {#sec-data}
 
 Some of our data is of penguins (@fig-bills), from @palmerpenguins.
+
 
 ```{r}
 #| label: Highest education vs number of respondents 
@@ -66,6 +68,7 @@ Some of our data is of penguins (@fig-bills), from @palmerpenguins.
   theme(legend.position = "bottom")
 
 ```
+
 ```{r}
 #| label: Race vs number of respondents 
 #| fig-cap: filtered by gender 
@@ -85,6 +88,7 @@ Some of our data is of penguins (@fig-bills), from @palmerpenguins.
   scale_fill_brewer(palette = "Set1") +
   theme(legend.position = "bottom")
 ```
+
 ```{r}
 #| label: Employment Status vs Number of respondents 
 #| fig-cap: filtered by gender 
@@ -104,6 +108,7 @@ Some of our data is of penguins (@fig-bills), from @palmerpenguins.
   scale_fill_brewer(palette = "Set1") +
   theme(legend.position = "bottom")
 ```
+
 
 Talk more about it.
 
@@ -143,6 +148,7 @@ We can use maths by including latex between dollar signs, for instance $\theta$.
 # Results
 
 Our results are summarized in @tbl-modelresults.
+
 
 ```{r}
 #| echo: false
@@ -184,6 +190,7 @@ modelplot(first_model, conf_level = 0.9) +
 
 
 
+
 # Discussion
 
 ## First discussion point {#sec-first-point}
@@ -215,6 +222,7 @@ In @fig-ppcheckandposteriorvsprior-1 we implement a posterior predictive check. 
 
 In @fig-ppcheckandposteriorvsprior-2 we compare the posterior with the prior. This shows... 
 
+
 ```{r}
 #| eval: true
 #| echo: false
@@ -245,11 +253,13 @@ posterior_vs_prior(first_model) +
   coord_flip()
 ```
 
+
 ## Diagnostics
 
 @fig-stanareyouokay-1 is a trace plot. It shows... This suggests...
 
 @fig-stanareyouokay-2 is a Rhat plot. It shows... This suggests...
+
 
 ```{r}
 #| echo: false
@@ -270,9 +280,11 @@ plot(first_model, "rhat")
 
 
 
+
 \newpage
 
 
 # References
+
 
 
