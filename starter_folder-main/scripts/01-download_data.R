@@ -21,7 +21,7 @@ ces2020 <-
     server = "dataverse.harvard.edu",
     .f = read_csv
   ) |>
-  select(votereg, CC20_410, employ, educ, race)
+  select(votereg, CC20_410, employ, educ, race, gender)
 
 
 
