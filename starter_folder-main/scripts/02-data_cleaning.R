@@ -22,7 +22,8 @@ ces2020 <-
         "CC20_410" = col_integer(),
         "employ" = col_integer(),
         "educ" = col_integer(),
-        "race" = col_integer()
+        "race" = col_integer(),
+        "gender" = col_integer()
       )
   )
 
@@ -62,6 +63,7 @@ ces2020 <-
       race == 6 ~ "Middle Eastern",
       race == 7 ~ "Two or more races"
     ),
+    gender = if_else(gender == 1, "Male", "Female"),
     education = factor(
       education,
       levels = c(
@@ -74,7 +76,7 @@ ces2020 <-
       )
     )
   ) |>
-  select(voted_for, employment_stat, education, race)
+  select(voted_for, employment_stat, education, race, gender)
 
 #### Save data ####
 write_parquet(ces2020, "starter_folder-main/data/analysis_data/analysis_data.parquet")
