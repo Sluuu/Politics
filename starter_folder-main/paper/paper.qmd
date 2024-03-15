@@ -1,5 +1,5 @@
 ---
-title: "Spadina Paper"
+title: "Forecasting 2020 US Election Outcomes: The Role of Employment, Education, gender, and Race"
 subtitle: "My subtitle if needed"
 author: 
   - Sean Liu
@@ -33,26 +33,39 @@ library(tidyverse)
 
 # Introduction
 
-we are interested in the US political support. In particular we are interested in whether we can forecast who a respondent is likely to vote for, based on knowing their employment status, highest level of education, and race. That means we are interested in a dataset with variables for who an individual voted for, and some of their characteristics, such as employment status, education level, and their race. We use @citeR and @rohan.
+we are interested in the US political support. In particular we are interested in whether we can forecast who a respondent is likely to vote for, based on knowing their employment status, highest level of education, and race. That means we are interested in a dataset with variables for who an individual voted for, and some of their characteristics, such as employment status, education level, gender, and their race. We use @citeR and @rohan.
 
 The remainder of this paper is structured as follows. @sec-data....
 
+# Features
+The original CES 2020 dataset, which shows in @tbl-raw, contains 61000 observations and many variables. We chose to feature these 6 variables: "votereg", "CC20_410", "race", "educ", "employ", "gender", in our analysis. 
+
+1. votereg: Shows whether the respondent is registered to vote or not.
+
+2. CC20_410: Shows the president candidate the respondents voted for.
+
+3. race: The racial or ethnic group best describe the respondents.
+
+4. educ: the highest education level of the respondents have obtained.
+
+5. employ: the current employment status of the respondent.
+
+6. gender: the gender of the respondents 
 
 
 # Data {#sec-data}
 
-Some of our data is of penguins (@fig-bills), from @palmerpenguins.
+Our primary data is from the 2020 Cooperative Election Study, CES @CES2020. The data includes a nationally representative sample of 61,000 American adults. @CES2020 includes the data from the survey, a full guide to the data, and the questionnaires.
 
 ```{r}
-#| label: Highest education vs number of respondents 
+#| label: fig-education 
 #| fig-cap: filtered by gender 
 #| echo: false
-#| eval: false
-#| withVisible: true
-#| 
+#| warning: false
+#| message: false
 
-
-  ggplot(ces2020, aes(x = education, fill = voted_for)) +
+ces2020 |>
+  ggplot( aes(x = education, fill = voted_for)) +
   stat_count(position = "dodge") +
   facet_wrap(facets = vars(gender)) +
   theme_minimal() +
@@ -66,8 +79,10 @@ Some of our data is of penguins (@fig-bills), from @palmerpenguins.
   theme(legend.position = "bottom")
 
 ```
+
+
 ```{r}
-#| label: Race vs number of respondents 
+#| label: fig-race 
 #| fig-cap: filtered by gender 
 #| echo: false
 #| eval: false
@@ -86,12 +101,12 @@ Some of our data is of penguins (@fig-bills), from @palmerpenguins.
   theme(legend.position = "bottom")
 ```
 ```{r}
-#| label: Employment Status vs Number of respondents 
+#| label: fig-employment status
 #| fig-cap: filtered by gender 
 #| echo: false
 #| eval: false
-
-  ggplot(ces2020, aes(x = employment_stat, fill = voted_for)) +
+ces2020 |>
+  ggplot(aes(x = employment_stat, fill = voted_for)) +
   stat_count(position = "dodge") +
   facet_wrap(facets = vars(gender)) +
   theme_minimal() +
@@ -128,7 +143,15 @@ Here we briefly describe the Bayesian analysis model used to investigate... Back
 
 Define $y_i$ as the number of seconds that the plane remained aloft. Then $\beta_i$ is the wing width and $\gamma_i$ is the wing length, both measured in millimeters.  
 
-
+\begin{align} 
+y_i|\pi_i &\sim \mbox{Bern}(\pi_i) \\
+\mbox{logit}(\pi_i) &= \alpha + \beta_1 \times \mbox{employemnt_status}_i + \beta_2 \times \mbox{race}_i + \beta_3 \times \mbox{education}_i + \beta_4 \times \mbox{gender}_i\\
+\alpha &\sim \mbox{Normal}(0, 2.5) \\
+\beta_1 &\sim \mbox{Normal}(0, 2.5) \\
+\beta_2 &\sim \mbox{Normal}(0, 2.5) \\
+\beta_3 &\sim \mbox{Normal}(0, 2.5) \\
+\beta_4 &\sim \mbox{Normal}(0, 2.5)
+\end{align}
 
 We run the model in R [@citeR] using the `rstanarm` package of @rstanarm. We use the default priors from `rstanarm`.
 
@@ -247,26 +270,37 @@ posterior_vs_prior(first_model) +
 
 ## Diagnostics
 
-@fig-stanareyouokay-1 is a trace plot. It shows... This suggests...
+@fig-traceplot is a trace plot. It shows... This suggests...
 
-@fig-stanareyouokay-2 is a Rhat plot. It shows... This suggests...
+@fig-rhatplot is a Rhat plot. It shows... This suggests...
 
 ```{r}
 #| echo: false
 #| eval: true
 #| message: false
 #| warning: false
-#| label: fig-stanareyouokay
+#| label: fig-traceplot
 #| fig-cap: "Checking the convergence of the MCMC algorithm"
-#| fig-subcap: ["Trace plot", "Rhat plot"]
-#| layout-ncol: 2
+#| fig-subcap: ["Trace plot"]
+
 
 plot(first_model, "trace")
 
-plot(first_model, "rhat")
 ```
 
+```{r}
+#| echo: false
+#| eval: true
+#| message: false
+#| warning: false
+#| label: fig-rhatplot
+#| fig-cap: "Checking the convergence of the MCMC algorithm"
+#| fig-subcap: ["Rhat plot"]
 
+
+
+plot(first_model, "rhat")
+```
 
 
 
