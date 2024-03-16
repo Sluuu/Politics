@@ -1,6 +1,5 @@
 ---
 title: "Forecasting 2020 US Election Outcomes: The Role of Employment, Education, gender, and Race"
-subtitle: "My subtitle if needed"
 author: 
   - Sean Liu
 thanks: "Code and data are available at: https://github.com/Sluuu/Politics.git"
@@ -33,30 +32,20 @@ library(tidyverse)
 
 # Introduction
 
-we are interested in the US political support. In particular we are interested in whether we can forecast who a respondent is likely to vote for, based on knowing their employment status, highest level of education, and race. That means we are interested in a dataset with variables for who an individual voted for, and some of their characteristics, such as employment status, education level, gender, and their race. We use @citeR and @rohan.
+Back in 2020, the US was having an important presidential election contest between the Democratic party and the Republican party. The Democratic ticket of former vice president Joe Biden and the Republican president, Donald Trump. The election saw the highest voter turnout by percentage since 1900, with each of the two main tickets receiving more than 74 million votes. In particular we are interested in whether we can forecast who a respondent is likely to vote for, based on knowing their employment status, highest level of education, and race. That means we are interested in a data-set with variables for who an individual voted for, and some of their characteristics, such as employment status, education level, gender, and their race. The data is from the 2020 election data set from Cooperative Election Study (CES) [@citeCes2020].
 
-The remainder of this paper is structured as follows. @sec-data....
+In this study, we used a logistic regression model to predict the 2020 election results, utilizing data from the Cooperative Election Study (CES). This model is well-suited for binary outcomes, such as predicting whether an individual voted for Trump or Biden. Our analysis aims to assess the probability of victory for each candidate, considering a variety of factors including employment status, education level, gender, and their race. The primary objective is to determine the actual support levels for Trump and Biden.
 
-# Features
-The original CES 2020 dataset, which shows in @tbl-raw, contains 61000 observations and many variables. We chose to feature these 6 variables: "votereg", "CC20_410", "race", "educ", "employ", "gender", in our analysis. 
-
-1. votereg: Shows whether the respondent is registered to vote or not.
-
-2. CC20_410: Shows the president candidate the respondents voted for.
-
-3. race: The racial or ethnic group best describe the respondents.
-
-4. educ: the highest education level of the respondents have obtained.
-
-5. employ: the current employment status of the respondent.
-
-6. gender: the gender of the respondents 
+The remainder of this paper is structured into different sections. @sec-data shows the data that are used for our study. It includes some graphs to demonstrate different groups of respondents in our data. @sec-model builds the model and discusses its justification and explanation. @sec-result highlights the results of the predictions using tables and graphs. @sec-discussion contains discussions that conducted based on the findings, which addresses the voting prediction results based on race, region, employment status, and the influence of COVID-19 and in-mail voting systems.
 
 
 # Data {#sec-data}
 
+## Source of Data
 Our primary data is from the 2020 Cooperative Election Study, CES @CES2020. The data includes a nationally representative sample of 61,000 American adults. @CES2020 includes the data from the survey, a full guide to the data, and the questionnaires.
 
+
+@fig-education shows the relationship between respondents' educational level, gender and their voting preferences. In both gender, respondets with higher educational level tends to lean more towards Biden. 
 ```{r}
 #| label: fig-education 
 #| fig-cap: filtered by gender 
@@ -80,7 +69,7 @@ ces2020 |>
 
 ```
 
-
+@fig-race shows the relationship between respondents' race, gender and their voting preferences. For males, individuals identifying as Black, Asian, or Hispanic supported more towards Biden. For white males the numbers of supporters between Biden and Trump are close. For female respondents, almost all kind of race are more likely to support Biden. 
 ```{r}
 #| label: fig-race 
 #| fig-cap: filtered by gender 
@@ -100,8 +89,9 @@ ces2020 |>
   scale_fill_brewer(palette = "Set1") +
   theme(legend.position = "bottom")
 ```
+@fig-employment_status shows the relationship between respondents' employment status, gender and their voting preferences. For male full-time respondents, they are more likely to support Biden. For the rest of the male respondents, the number of supporters between Biden and Trump are close. For female respondents, regardless of the employment status, most of the them are supporting Biden. 
 ```{r}
-#| label: fig-employment status
+#| label: fig-employment_status
 #| fig-cap: filtered by gender 
 #| echo: false
 #| eval: false
@@ -120,28 +110,27 @@ ces2020 |>
   theme(legend.position = "bottom")
 ```
 
-Talk more about it.
+## Features
+The original CES 2020 dataset, which shows in @tbl-raw, contains 61000 observations and many variables. We chose to demonstrate these 6 variables: "votereg", "CC20_410", "race", "educ", "employ", "gender", in our analysis. 
+
+- votereg: Shows whether the respondent is registered to vote or not.
+- CC20_410: Shows the president candidate the respondents voted for.
+- race: The racial or ethnic group best describe the respondents.
+- educ: The highest education level of the respondents have obtained.
+- employ: The current employment status of the respondent.
+- gender: The gender of the respondents 
+
+## Data Measurements 
+
+The dataset is cleaned by renaming the column names and specifying the class of the columns. For an easier prediction of our study, NA employment status and other race are removed since there are a small amount of missing value compared with 61000 entries. After cleaning, we are left with 43554 observations with 5 variables.
 
 
+# Model {#sec-model}
 
-And also planes (@fig-planes). (You can change the height and width, but don't worry about doing that until you have finished every other aspect of the paper - Quarto will try to make it look nice and the defaults usually work well once you have enough text.)
-
-
-
-
-Talk way more about it. 
-
-
-
-# Model
-
-The goal of our modelling strategy is twofold. Firstly,...
-
-Here we briefly describe the Bayesian analysis model used to investigate... Background details and diagnostics are included in [Appendix -@sec-model-details].
 
 ## Model set-up
 
-Define $y_i$ as the number of seconds that the plane remained aloft. Then $\beta_i$ is the wing width and $\gamma_i$ is the wing length, both measured in millimeters.  
+The model that we are interested in is:
 
 \begin{align} 
 y_i|\pi_i &\sim \mbox{Bern}(\pi_i) \\
@@ -153,20 +142,26 @@ y_i|\pi_i &\sim \mbox{Bern}(\pi_i) \\
 \beta_4 &\sim \mbox{Normal}(0, 2.5)
 \end{align}
 
-We run the model in R [@citeR] using the `rstanarm` package of @rstanarm. We use the default priors from `rstanarm`.
+Where $y_i$ is the political preference of the respondent, it equals to 1 if the respondent voted for Biden and 0 for Trump, \text{employment_status}_i is the employment status of the respondent, \text{race}_i is the race of the respondent, \text{education}_i is the highest educational level of the respondent, and lastly \text{gender}_i is the gender of the respondent. 
+The coefficients ($\beta_1$, $\beta_2$, $\beta_3$) are being assumed as a normal distribution with a mean of 0 and a standard deviation of 2.5 for each parameter. Lastly, $pi_i$ is the probability of voting for Biden. 
+We run the model in R [@citeR] using the `rstanarm` package of @rstanarm.
 
 
-### Model justification
+## Model justification
 
 We expect a positive relationship between the size of the wings and time spent aloft. In particular...
 
 We can use maths by including latex between dollar signs, for instance $\theta$.
 
+We anticipate a positive correlation between individuals identifying as Black, Asian, or Hispanic and their support for Biden. As Biden's proposal to more advanced racial equity in the US [@BidenProposal]. Most traditional white voters are more likely to support Trump. As Trump's cultural and the atmosphere of Make America great again. Which tend to these group of people to support him [@TrumpProposal]. 
+
+For the education level, we expect respondents who has a higher educational level to be leaning towards to support Biden. As people with higher educational levels are more open to diverse perspectives and the new directions in education that Biden proposed [@Bideneduc].  
+
+Lastly the voting preferences for employed voters and the difference in gender are harder to determine.
 
 # Results
 
 Our results are summarized in @tbl-modelresults.
-
 ```{r}
 #| echo: false
 #| eval: true
@@ -178,6 +173,8 @@ library(rstanarm)
 first_model <-
   readRDS(file = here::here("starter_folder-main/models/first_model.rds"))
 ```
+The results 
+
 
 ```{r}
 #| echo: false
@@ -209,13 +206,6 @@ modelplot(first_model, conf_level = 0.9) +
 
 # Discussion
 
-## First discussion point {#sec-first-point}
-
-If my paper were 10 pages, then should be be at least 2.5 pages. The discussion is a chance to show off what you know and what you learnt from all this. 
-
-## Second discussion point
-
-## Third discussion point
 
 ## Weaknesses and next steps
 
