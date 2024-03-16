@@ -16,10 +16,10 @@ bibliography: references.bib
 #| warning: false
 #| message: false
 
-library(boot)
-library(broom.mixed)
-library(collapse)
-library(gutenbergr)
+library(here)
+library(plotly)
+library(tibble)
+library(margins)
 library(janitor)
 library(knitr)
 library(marginaleffects)
@@ -27,12 +27,14 @@ library(modelsummary)
 library(rstanarm)
 library(tidybayes)
 library(tidyverse)
+library(kableExtra)
+library(ggplot2)
 ```
 
 
 # Introduction
 
-Back in 2020, the US was having an important presidential election contest between the Democratic party and the Republican party. The Democratic ticket of former vice president Joe Biden and the Republican president, Donald Trump. The election saw the highest voter turnout by percentage since 1900, with each of the two main tickets receiving more than 74 million votes. In particular we are interested in whether we can forecast who a respondent is likely to vote for, based on knowing their employment status, highest level of education, and race. That means we are interested in a data-set with variables for who an individual voted for, and some of their characteristics, such as employment status, education level, gender, and their race. The data is from the 2020 election data set from Cooperative Election Study (CES) [@citeCes2020].
+Back in 2020, the US was having an important presidential election contest between the Democratic party and the Republican party. The Democratic ticket of former vice president Joe Biden and the Republican president, Donald Trump. The election saw the highest voter turnout by percentage since 1900, with each of the two main tickets receiving more than 74 million votes. In particular we are interested in whether we can forecast who a respondent is likely to vote for, based on knowing their employment status, highest level of education, and race. That means we are interested in a data-set with variables for who an individual voted for, and some of their characteristics, such as employment status, education level, gender, and their race. The data is from the 2020 election data set from Cooperative Election Study (CES) [@Ces2020].
 
 In this study, we used a logistic regression model to predict the 2020 election results, utilizing data from the Cooperative Election Study (CES). This model is well-suited for binary outcomes, such as predicting whether an individual voted for Trump or Biden. Our analysis aims to assess the probability of victory for each candidate, considering a variety of factors including employment status, education level, gender, and their race. The primary objective is to determine the actual support levels for Trump and Biden.
 
@@ -41,20 +43,20 @@ The remainder of this paper is structured into different sections. @sec-data sho
 
 # Data {#sec-data}
 
+
 ## Source of Data
-Our primary data is from the 2020 Cooperative Election Study, CES @CES2020. The data includes a nationally representative sample of 61,000 American adults. @CES2020 includes the data from the survey, a full guide to the data, and the questionnaires.
+Our primary data is from the 2020 Cooperative Election Study, CES @Ces2020. The data includes a nationally representative sample of 61,000 American adults. @Ces2020 includes the data from the survey, a full guide to the data, and the questionnaires.
 
 
 @fig-education shows the relationship between respondents' educational level, gender and their voting preferences. In both gender, respondets with higher educational level tends to lean more towards Biden. 
 ```{r}
-#| label: fig-education 
-#| fig-cap: filtered by gender 
 #| echo: false
 #| warning: false
 #| message: false
+#| eval: false
 
-ces2020 |>
-  ggplot( aes(x = education, fill = voted_for)) +
+educ_gen <-
+  ggplot(ces2020, aes(x = education, fill = voted_for)) +
   stat_count(position = "dodge") +
   facet_wrap(facets = vars(gender)) +
   theme_minimal() +
@@ -66,16 +68,26 @@ ces2020 |>
   coord_flip() +
   scale_fill_brewer(palette = "Set1") +
   theme(legend.position = "bottom")
+```
 
+```{r}
+#| label: fig-education 
+#| fig-cap: filtered by gender 
+#| echo: false
+#| warning: false
+#| message: false
+print(educ_gen)
 ```
 
 @fig-race shows the relationship between respondents' race, gender and their voting preferences. For males, individuals identifying as Black, Asian, or Hispanic supported more towards Biden. For white males the numbers of supporters between Biden and Trump are close. For female respondents, almost all kind of race are more likely to support Biden. 
 ```{r}
-#| label: fig-race 
-#| fig-cap: filtered by gender 
 #| echo: false
+#| warning: false
+#| message: false
 #| eval: false
 
+
+race_gen <-
   ggplot(ces2020, aes(x = race, fill = voted_for)) +
   stat_count(position = "dodge") +
   facet_wrap(facets = vars(gender)) +
@@ -88,15 +100,24 @@ ces2020 |>
   coord_flip() +
   scale_fill_brewer(palette = "Set1") +
   theme(legend.position = "bottom")
+
 ```
+```{r}
+#| label: fig-race 
+#| fig-cap: filtered by gender 
+
+print(race_gen)
+```
+
 @fig-employment_status shows the relationship between respondents' employment status, gender and their voting preferences. For male full-time respondents, they are more likely to support Biden. For the rest of the male respondents, the number of supporters between Biden and Trump are close. For female respondents, regardless of the employment status, most of the them are supporting Biden. 
 ```{r}
-#| label: fig-employment_status
-#| fig-cap: filtered by gender 
 #| echo: false
+#| warning: false
+#| message: false
 #| eval: false
-ces2020 |>
-  ggplot(aes(x = employment_stat, fill = voted_for)) +
+
+emplo_stat_gen <-
+  ggplot(ces2020, aes(x = employment_stat, fill = voted_for)) +
   stat_count(position = "dodge") +
   facet_wrap(facets = vars(gender)) +
   theme_minimal() +
@@ -108,10 +129,19 @@ ces2020 |>
   coord_flip() +
   scale_fill_brewer(palette = "Set1") +
   theme(legend.position = "bottom")
+
+```
+```{r}
+#| label: fig-employment_status
+#| fig-cap: filtered by gender 
+
+print(emplo_stat_gen)
+
 ```
 
+
 ## Features
-The original CES 2020 dataset, which shows in @tbl-raw, contains 61000 observations and many variables. We chose to demonstrate these 6 variables: "votereg", "CC20_410", "race", "educ", "employ", "gender", in our analysis. 
+The original CES 2020 data-set contains 61000 observations and many variables. We chose to demonstrate these 6 variables: "votereg", "CC20_410", "race", "educ", "employ", "gender", in our analysis. 
 
 - votereg: Shows whether the respondent is registered to vote or not.
 - CC20_410: Shows the president candidate the respondents voted for.
@@ -131,7 +161,6 @@ The dataset is cleaned by renaming the column names and specifying the class of 
 ## Model set-up
 
 The model that we are interested in is:
-
 \begin{align} 
 y_i|\pi_i &\sim \mbox{Bern}(\pi_i) \\
 \mbox{logit}(\pi_i) &= \alpha + \beta_1 \times \mbox{employemnt_status}_i + \beta_2 \times \mbox{race}_i + \beta_3 \times \mbox{education}_i + \beta_4 \times \mbox{gender}_i\\
@@ -142,7 +171,8 @@ y_i|\pi_i &\sim \mbox{Bern}(\pi_i) \\
 \beta_4 &\sim \mbox{Normal}(0, 2.5)
 \end{align}
 
-Where $y_i$ is the political preference of the respondent, it equals to 1 if the respondent voted for Biden and 0 for Trump, \text{employment_status}_i is the employment status of the respondent, \text{race}_i is the race of the respondent, \text{education}_i is the highest educational level of the respondent, and lastly \text{gender}_i is the gender of the respondent. 
+
+Where $y_i$ is the political preference of the respondent, it equals to 1 if the respondent voted for Biden and 0 for Trump, $\text{employment_status}_i$ is the employment status of the respondent, $\text{race}_i$ is the race of the respondent, $\text{education}_i$ is the highest educational level of the respondent, and lastly $\text{gender}_i$ is the gender of the respondent. 
 The coefficients ($\beta_1$, $\beta_2$, $\beta_3$) are being assumed as a normal distribution with a mean of 0 and a standard deviation of 2.5 for each parameter. Lastly, $pi_i$ is the probability of voting for Biden. 
 We run the model in R [@citeR] using the `rstanarm` package of @rstanarm.
 
@@ -171,7 +201,7 @@ Our results are summarized in @tbl-modelresults.
 library(rstanarm)
 
 first_model <-
-  readRDS(file = here::here("starter_folder-main/models/first_model.rds"))
+  readRDS(file = here::here("models/first_model.rds"))
 ```
 The results 
 
@@ -238,7 +268,7 @@ In @fig-ppcheckandposteriorvsprior-2 we compare the posterior with the prior. Th
 #| fig-cap: "Examining how the model fits, and is affected by, the data"
 #| fig-subcap: ["Posterior prediction check", "Comparing the posterior with the prior"]
 
-analysis_data <- arrow::read_parquet(here::here("starter_folder-main/data/analysis_data/analysis_data.parquet"))
+analysis_data <- arrow::read_parquet(here::here("data/analysis_data/analysis_data.parquet"))
 
 set.seed(853)
 
