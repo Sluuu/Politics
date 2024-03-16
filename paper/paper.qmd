@@ -5,7 +5,7 @@ author:
 thanks: "Code and data are available at: https://github.com/Sluuu/Politics.git"
 date: today
 date-format: long
-abstract: "First sentence. Second sentence. Third sentence. Fourth sentence."
+abstract: "hi Second sentence. Third sentence. Fourth sentence."
 format: pdf
 number-sections: true
 bibliography: references.bib
