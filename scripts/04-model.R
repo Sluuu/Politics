@@ -13,7 +13,7 @@ library(tidyverse)
 library(rstanarm)
 library(dplyr)
 #### Read data ####
-analysis_data <- read_parquet("starter_folder-main/data/analysis_data/analysis_data.parquet")
+analysis_data <- read_parquet("data/analysis_data/analysis_data.parquet")
 set.seed(853)
 
 ces2020_reduced <- 

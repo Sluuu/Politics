@@ -15,7 +15,7 @@ library(arrow)
 #### Clean data ####
 ces2020 <-
   read_csv(
-    "starter_folder-main/data/raw_data/ces2020.csv",
+    "data/raw_data/ces2020.csv",
     col_types =
       cols(
         "votereg" = col_integer(),
@@ -79,4 +79,4 @@ ces2020 <-
   select(voted_for, employment_stat, education, race, gender)
 
 #### Save data ####
-write_parquet(ces2020, "starter_folder-main/data/analysis_data/analysis_data.parquet")
+write_parquet(ces2020, "data/analysis_data/analysis_data.parquet")
